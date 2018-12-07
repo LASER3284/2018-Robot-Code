@@ -5,7 +5,7 @@ Robot Code from the 2018 season, Power Up, for 3284's Howitzer.
 <br>
 **"release" branch** contains the most current _stable_ code. This code should be tested thoroughly and working.
 <br>
-**"Vision" branch** contains our Vision code for running on the Raspberry Pi for 2018.
+**"vision" branch** contains our Vision code for running on the Raspberry Pi for 2018.
 <br>
 ### Getting it to run
 Generally, you can compile it however you'd like using FRC Toolchains.
