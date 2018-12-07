@@ -1,11 +1,11 @@
 # 2018-robotcode
 Robot Code from the 2018 season, Power Up, for 3284's Howitzer.
 ## Branches
-**"master" branch** contains most development, changes, and whatnot. All other branches should be forked from master.
+**"master" branch** contains most development and changes. All other branches should be forked from master.
 <br>
-**"release" branch** contains the most current _stable_ code. This code should be tested thoroughly and working. Merge with master if something is completely broken.
+**"release" branch** contains the most current _stable_ code. This code should be tested thoroughly and working.
 <br>
-**"swerve-code" branch** should _never_ be merged. This will be a separate repository following the Github account migration, labeled as off-season code.
+**"Vision" branch** contains our Vision code for running on the Raspberry Pi for 2018.
 <br>
 ### Getting it to run
 Generally, you can compile it however you'd like using FRC Toolchains.
