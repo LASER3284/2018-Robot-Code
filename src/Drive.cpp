@@ -189,12 +189,15 @@ void CDrive::Tick(bool bSquareDrive)
 		}
 
 		// Get the X axis value from the joystick.
-		m_dXAxis = m_pDriveController->GetRawAxis(0);
+		m_dXAxis = m_pDriveController->GetRawAxis(4);
 		// Check if the X Axis value is outside of the deadzone.
-		if (fabs(m_dXAxis) > 0.250)
+		if (fabs(m_dXAxis) > 0.200)
 		{
-			// Valid X Axis value, multiply by the throttle.
-			m_dXAxis = (-1 * (m_dXAxis / (SmartDashboard::GetNumber("X Axis Divisor", 2.000))));
+			if (m_pShiftSolenoid->Get())
+			{
+				// Valid X Axis value, multiply by the throttle.
+				m_dXAxis = (m_dXAxis / (SmartDashboard::GetNumber("Z Axis Divisor", 2.000)));
+			}
 		}
 		else
 		{
@@ -203,7 +206,7 @@ void CDrive::Tick(bool bSquareDrive)
 		}
 
 		// Drive the robot.
-		m_pRobotDrive->ArcadeDrive(m_dYAxis, m_dXAxis, bSquareDrive);
+		m_pRobotDrive->CurvatureDrive(m_dYAxis, -m_dXAxis, m_pShiftSolenoid->Get());
 	}
 	else
 	{
@@ -242,17 +245,21 @@ void CDrive::Tick(bool bSquareDrive)
 	Returns: 		Nothing
 ****************************************************************************/
 
-void CDrive::VisionTick(double dTolerance, double dProportional)
+void CDrive::VisionTick()
 {
 
-	// Resolution of Camera = 175x143
+	const int nHorizontalRes		= SmartDashboard::GetNumber("VisionHorizontalRes", 176);
 	// Constants.
-	const double dSpeedForward 		 =  0.700;
-	const double dCameraCenter 		 = 87.500;
-	const double dInsideTurnDivisor  =  2.300; //3.500
-	const double dOutsideTurnDivisor =  1.300; // 3.000 //1.800
+	const double dCameraCenter 		=  nHorizontalRes/2;
 	// Declare variables.
-	std::string strDetectSize;
+	double dTolerance				=  (SmartDashboard::GetNumber("VisionTolerance", 15.0));
+	double dTurningTolerance		=  (SmartDashboard::GetNumber("VisionTurningTolerance", 10));
+	double dProportional			=  (SmartDashboard::GetNumber("VisionProportional", 1.500));
+	double dSpeedForward 		 	=  (SmartDashboard::GetNumber("VisionSpeedForward", 0.600));
+	double dSpeedTurning			=  (SmartDashboard::GetNumber("VisionSpeedTurning", 0.420));
+	double dInsideTurnDivisor  		=  (SmartDashboard::GetNumber("VisionInsideTurnDivisor", 2.000));
+	double dOutsideTurnDivisor 		=  (SmartDashboard::GetNumber("VisionOutsideTurnDivisor", 1.200));
+	double dDetectSize;
 	double dxCenter;
 	double dSetpointLeft;
 	double dSetpointRight;
@@ -263,7 +270,7 @@ void CDrive::VisionTick(double dTolerance, double dProportional)
 	double dSpeedLeft;
 	double dSpeedRight;
 	// Calculate Center Point on X Axis.
-	dxCenter	 	= ((SmartDashboard::GetNumber("VisionPositionNumber", dCameraCenter)));
+	dxCenter	 	= ((SmartDashboard::GetNumber("VisionObjectCenter", dCameraCenter)));
 	// Calculate Setpoints with Tolerance
 	dSetpointLeft 	= (dCameraCenter -  dTolerance);
 	dSetpointRight  = (dCameraCenter +  dTolerance);
@@ -275,10 +282,10 @@ void CDrive::VisionTick(double dTolerance, double dProportional)
 	dGainRight 		= (dProportional * dErrorRight);
 
 	// Read Size from SmartDashboard.
-	strDetectSize 	= SmartDashboard::GetString("VisionDistance", "Lock Object");
+	dDetectSize 	= SmartDashboard::GetNumber("VisionObjectSize", 0);
 
 	// The object is close, stop motors.
-	if (strDetectSize == "Lock Object")
+	if (dDetectSize == 48)
 	{
 		dSpeedLeft  = 0.000;
 		dSpeedRight = 0.000;
@@ -287,24 +294,41 @@ void CDrive::VisionTick(double dTolerance, double dProportional)
 	{
 		// Due to the camera being mounted in reverse, all logic is inverted.
 		// Object is Centered, move forward until Lock size.
-		if ((dxCenter > (dSetpointLeft - 15)) && (dxCenter < (dSetpointRight + 15)))
+		if (dxCenter > dSetpointLeft && dxCenter < dSetpointRight)
 		{
-			dSpeedLeft  = dSpeedForward;
-			dSpeedRight = (dSpeedForward * -1);
+			dSpeedLeft = dSpeedForward;
+			dSpeedRight = dSpeedForward;
 		}
 		// Object is offset to the left, turn.
 		if (dxCenter < dSetpointLeft)
 		{
-			dSpeedLeft   = ((dGainLeft / dSetpointLeft) / dOutsideTurnDivisor);
-			dSpeedRight  = (((dGainLeft / dSetpointLeft) / dInsideTurnDivisor) * -1);
+			if (!((dSetpointLeft - dxCenter) >= dTurningTolerance))
+			{
+				dSpeedLeft   = ((dGainLeft / dSetpointLeft) / dOutsideTurnDivisor) + dSpeedTurning;
+				dSpeedRight  = (((dGainLeft / dSetpointLeft) / dInsideTurnDivisor) + dSpeedTurning) * -1;
+			}
+			else
+			{
+				dSpeedLeft   = ((dGainLeft / dSetpointLeft) / dOutsideTurnDivisor);
+				dSpeedRight  = (((dGainLeft / dSetpointLeft) / dInsideTurnDivisor) * -1);
+			}
 		}
 		// Object is offset to the right, turn.
 		if (dxCenter > dSetpointRight)
 		{
-			dSpeedLeft  = ((dGainRight / dSetpointRight) / dInsideTurnDivisor);
-			dSpeedRight = (((dGainRight / dSetpointRight) / dOutsideTurnDivisor) * -1);
+			if (!((dxCenter - dSetpointRight) >= dTurningTolerance))
+			{
+				dSpeedLeft  = ((dGainRight / dSetpointRight) / dInsideTurnDivisor) + dSpeedTurning;
+				dSpeedRight = (((dGainRight / dSetpointRight) / dOutsideTurnDivisor) + dSpeedTurning) * -1;
+			}
+			else
+			{
+				dSpeedLeft  = ((dGainRight / dSetpointRight) / dInsideTurnDivisor);
+				dSpeedRight = (((dGainRight / dSetpointRight) / dOutsideTurnDivisor) * -1);
+			}
 		}
 	}
+	m_pShiftSolenoid->Set(true);
 	// Set motor speeds.
 	m_pLeftDriveMotor1->Set(ControlMode::PercentOutput,  dSpeedLeft);
 	m_pLeftDriveMotor2->Set(ControlMode::PercentOutput,  dSpeedLeft);
