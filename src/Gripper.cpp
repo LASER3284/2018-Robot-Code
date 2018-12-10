@@ -369,8 +369,8 @@ void CGripper::GripperStateMachine()
 			SmartDashboard::PutString("Gripper State", "Floor Eject - Delay Closing Claw");
 
 			// Get the delay to close claw from the dashboard.
-			dFloorEjectStopMotorDelay = SmartDashboard::GetNumber("Scale Eject Close Claw Delay", dDefaultScaleEjectCloseClawDelay);
-			if (m_pTimer->Get() > (m_dDelayStartTime + dScaleEjectCloseClawDelay))
+			dFloorEjectStopMotorDelay = SmartDashboard::GetNumber("Floor Eject Stop Motor Delay", dDefaultFloorEjectStopMotorDelay);
+			if (m_pTimer->Get() > (m_dDelayStartTime + dFloorEjectStopMotorDelay))
 			{
 				// Move to Gripper Idle state.
 				m_nGripperState = eGripperIdle;

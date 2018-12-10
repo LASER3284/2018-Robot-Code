@@ -267,8 +267,8 @@ void CDrive::VisionTick()
 	double dErrorRight;
 	double dGainLeft;
 	double dGainRight;
-	double dSpeedLeft;
-	double dSpeedRight;
+	double dSpeedLeft  = 0.00;
+	double dSpeedRight = 0.00;
 	// Calculate Center Point on X Axis.
 	dxCenter	 	= ((SmartDashboard::GetNumber("VisionObjectCenter", dCameraCenter)));
 	// Calculate Setpoints with Tolerance
@@ -285,7 +285,7 @@ void CDrive::VisionTick()
 	dDetectSize 	= SmartDashboard::GetNumber("VisionObjectSize", 0);
 
 	// The object is close, stop motors.
-	if (dDetectSize == 48)
+	if (dDetectSize <= 48)
 	{
 		dSpeedLeft  = 0.000;
 		dSpeedRight = 0.000;

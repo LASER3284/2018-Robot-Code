@@ -1251,7 +1251,7 @@ void CRobotMain::TeleopPeriodic()
 	/********************************************************************
 		Drive Controller - Call vision tick if button is held down.
 	********************************************************************/
-	static bool bGripperSet = false;
+///	static bool bGripperSet = false;
 
 	// Check to see if Left Trigger was pressed.
 	if (m_pDriveController->GetRawAxis(2) >= 0.5) // Note that this should be looped.
@@ -1278,7 +1278,7 @@ void CRobotMain::TeleopPeriodic()
 		// Reset to Joystick control to avoid "sluggish motor syndrome."
 		m_pDrive->Init();
 		// The gripper should no longer be set, set it to false.
-		bGripperSet = false;
+///		bGripperSet = false;
 		m_bDriveControllerLeftTriggerPressed = false;
 	}
 
