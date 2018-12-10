@@ -248,9 +248,9 @@ void CDrive::Tick(bool bSquareDrive)
 void CDrive::VisionTick()
 {
 
-	// Resolution of Camera = 176x144
+	const int nHorizontalRes		= SmartDashboard::GetNumber("VisionHorizontalRes", 176);
 	// Constants.
-	const double dCameraCenter 		=  (SmartDashboard::GetNumber("VisionCameraCenter", 88.000));
+	const double dCameraCenter 		=  nHorizontalRes/2;
 	// Declare variables.
 	double dTolerance				=  (SmartDashboard::GetNumber("VisionTolerance", 15.0));
 	double dTurningTolerance		=  (SmartDashboard::GetNumber("VisionTurningTolerance", 10));
@@ -267,8 +267,8 @@ void CDrive::VisionTick()
 	double dErrorRight;
 	double dGainLeft;
 	double dGainRight;
-	double dSpeedLeft = 0.000;
-	double dSpeedRight = 0.000;
+	double dSpeedLeft;
+	double dSpeedRight;
 	// Calculate Center Point on X Axis.
 	dxCenter	 	= ((SmartDashboard::GetNumber("VisionObjectCenter", dCameraCenter)));
 	// Calculate Setpoints with Tolerance
