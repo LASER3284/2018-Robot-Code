@@ -143,6 +143,16 @@ void CRobotMain::RobotInit()
 	SmartDashboard::PutNumber("CenterRight 3 Left",  -66.00);		// Center Auton, Right Switch Hot, Second Move, Left Drive
 	SmartDashboard::PutNumber("CenterRight 3 Right",  66.00);		// Center Auton, Right Switch Hot, Second Move, Right Drive
 
+	// Add the vision values to the smart dashboard.
+	SmartDashboard::PutNumber("VisionCameraCenter", 88.000);
+	SmartDashboard::PutNumber("VisionTolerance", 15.0);
+	SmartDashboard::PutNumber("VisionTurningTolerance", 10);
+	SmartDashboard::PutNumber("VisionProportional", 1.500);
+	SmartDashboard::PutNumber("VisionSpeedForward", 0.600);
+	SmartDashboard::PutNumber("VisionSpeedTurning", 0.420);
+	SmartDashboard::PutNumber("VisionInsideTurnDivisor", 2.000);
+	SmartDashboard::PutNumber("VisionOutsideTurnDivisor", 1.200);
+
 	// Set up the autonomous chooser for the smart dashboard.
 	m_pAutonomousChooser->AddDefault(m_strAutonomousIdle, 			m_strAutonomousIdle);
 	m_pAutonomousChooser->AddObject(m_strAutonomousVgetblock, 		m_strAutonomousVgetblock);
@@ -381,7 +391,7 @@ void CRobotMain::AutonomousStateMachine()
 			// Use Vision to find a cube.
 			///SmartDashboard::PutNumber("LockObjectThresh", 236);
 			SmartDashboard::PutBoolean("VisionFreeMode", true);
-			m_pDrive->VisionTick(15.5, 5);
+			m_pDrive->VisionTick();
 			// Wait until Gripper successfully grabs cube.
 			//if (m_pGripper->GetGripperState() == 0)
 			//{
@@ -406,7 +416,7 @@ void CRobotMain::AutonomousStateMachine()
 			// Go find tape
 			///SmartDashboard::PutNumber("LockObjectThresh", 40);
 			SmartDashboard::PutBoolean("VisionFreeMode", false);
-			m_pDrive->VisionTick(15.5, 5);
+			m_pDrive->VisionTick();
 			if (SmartDashboard::GetNumber("VisionDistanceNumber", 10) >= SmartDashboard::GetNumber("LockObjectThresh", 40))
 			{
 				m_pGripper->SetGripperState(m_pGripper->eGripperFloorEject1A);
@@ -891,7 +901,7 @@ void CRobotMain::AutonomousStateMachine()
 			else
 			{
 				// Cycle through the VisionTick until Gripper grabs a cube.
-				m_pDrive->VisionTick(30.5, 3);
+				m_pDrive->VisionTick();
 			}
 			break;
 
@@ -989,7 +999,7 @@ void CRobotMain::AutonomousStateMachine()
 			else
 			{
 				// Cycle through the VisionTick
-				m_pDrive->VisionTick(30.5, 3.5);
+				m_pDrive->VisionTick();
 			}
 			break;
 
@@ -1241,34 +1251,34 @@ void CRobotMain::TeleopPeriodic()
 	/********************************************************************
 		Drive Controller - Call vision tick if button is held down.
 	********************************************************************/
-	static bool bGripperSet = false;
+///	static bool bGripperSet = false;
 
 	// Check to see if Left Trigger was pressed.
 	if (m_pDriveController->GetRawAxis(2) >= 0.5) // Note that this should be looped.
 	{
-		if (bGripperSet == false)
-		{
-			// Open claw for intake.
-			m_pGripper->SetGripperState(m_pGripper->eGripperOpenIntake1A);
-			bGripperSet = true;
-		}
+///		if (bGripperSet == false)
+///		{
+///			// Open claw for intake.
+///			m_pGripper->SetGripperState(m_pGripper->eGripperOpenIntake1A);
+///			bGripperSet = true;
+///		}
 		m_bDriveControllerLeftTriggerPressed = true;
 
 		// Call VisionTick.
-		m_pDrive->VisionTick(20.5, 1.6); //20.5, 2.9
+		m_pDrive->VisionTick();
 
-		// Check if the claw has a cube and move the arm to Switch Position.
-		if (m_pGripper->eGripperIdle)
-		{
-			m_nTeleOpState = eTeleOpArmSwitchPosition1;
-		}
+/// 	// Check if the claw has a cube and move the arm to Switch Position.
+///		if (m_pGripper->eGripperIdle)
+///		{
+///			m_nTeleOpState = eTeleOpArmSwitchPosition1;
+///		}
 	}
 	if (m_pDriveController->GetRawAxis(2) < 0.5 && m_bDriveControllerLeftTriggerPressed)
 	{
 		// Reset to Joystick control to avoid "sluggish motor syndrome."
 		m_pDrive->Init();
 		// The gripper should no longer be set, set it to false.
-		bGripperSet = false;
+///		bGripperSet = false;
 		m_bDriveControllerLeftTriggerPressed = false;
 	}
 

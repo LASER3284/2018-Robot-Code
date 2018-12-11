@@ -1,4 +1,4 @@
-# 2018-robotcode
+# 2018 Robot Code
 Robot Code from the 2018 season, Power Up, for 3284's Howitzer.
 ## Branches
 **"master" branch** contains most development and changes. All other branches should be forked from master.

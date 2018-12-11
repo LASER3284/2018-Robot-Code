@@ -44,7 +44,7 @@ public:
 
 	void	Init();
 	void 	Tick(bool squareDrive = false);
-	void	VisionTick(double dTolerance, double dProportional);
+	void	VisionTick();
 	void	Stop();
 	void 	Shift(bool bLowGear);
 	bool	IsReady();
