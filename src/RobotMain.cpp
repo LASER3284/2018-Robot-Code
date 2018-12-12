@@ -144,6 +144,7 @@ void CRobotMain::RobotInit()
 	SmartDashboard::PutNumber("CenterRight 3 Right",  66.00);		// Center Auton, Right Switch Hot, Second Move, Right Drive
 
 	// Add the vision values to the smart dashboard.
+	SmartDashboard::PutNumber("VisionHorizontalRes", 176);
 	SmartDashboard::PutNumber("VisionCameraCenter", 88.000);
 	SmartDashboard::PutNumber("VisionTolerance", 15.0);
 	SmartDashboard::PutNumber("VisionTurningTolerance", 10);

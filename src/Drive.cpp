@@ -285,7 +285,7 @@ void CDrive::VisionTick()
 	dDetectSize 	= SmartDashboard::GetNumber("VisionObjectSize", 0);
 
 	// The object is close, stop motors.
-	if (dDetectSize <= 48)
+	if (dDetectSize >= 30)
 	{
 		dSpeedLeft  = 0.000;
 		dSpeedRight = 0.000;
