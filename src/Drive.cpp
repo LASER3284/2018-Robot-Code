@@ -252,13 +252,11 @@ void CDrive::VisionTick()
 	// Constants.
 	const double dCameraCenter 		=  nHorizontalRes/2;
 	// Declare variables.
-	double dTolerance				=  (SmartDashboard::GetNumber("VisionTolerance", 15.0));
-	double dTurningTolerance		=  (SmartDashboard::GetNumber("VisionTurningTolerance", 10));
-	double dProportional			=  (SmartDashboard::GetNumber("VisionProportional", 1.500));
+	double dTolerance				=  (SmartDashboard::GetNumber("VisionTolerance", 10.0));
+	double dProportional			=  (SmartDashboard::GetNumber("VisionProportional", 3.000));
 	double dSpeedForward 		 	=  (SmartDashboard::GetNumber("VisionSpeedForward", 0.600));
-	double dSpeedTurning			=  (SmartDashboard::GetNumber("VisionSpeedTurning", 0.420));
-	double dInsideTurnDivisor  		=  (SmartDashboard::GetNumber("VisionInsideTurnDivisor", 2.000));
-	double dOutsideTurnDivisor 		=  (SmartDashboard::GetNumber("VisionOutsideTurnDivisor", 1.200));
+	double dInsideTurnDivisor  		=  (SmartDashboard::GetNumber("VisionInsideTurnDivisor", 3.000));
+	double dOutsideTurnDivisor 		=  (SmartDashboard::GetNumber("VisionOutsideTurnDivisor", 2.000));
 	double dDetectSize;
 	double dxCenter;
 	double dSetpointLeft;
@@ -285,7 +283,7 @@ void CDrive::VisionTick()
 	dDetectSize 	= SmartDashboard::GetNumber("VisionObjectSize", 0);
 
 	// The object is close, stop motors.
-	if (dDetectSize <= 48)
+	if (dDetectSize >= 30)
 	{
 		dSpeedLeft  = 0.000;
 		dSpeedRight = 0.000;
@@ -297,34 +295,32 @@ void CDrive::VisionTick()
 		if (dxCenter > dSetpointLeft && dxCenter < dSetpointRight)
 		{
 			dSpeedLeft = dSpeedForward;
-			dSpeedRight = dSpeedForward;
+			dSpeedRight = (dSpeedForward * -1);
 		}
 		// Object is offset to the left, turn.
 		if (dxCenter < dSetpointLeft)
 		{
-			if (!((dSetpointLeft - dxCenter) >= dTurningTolerance))
+			dSpeedLeft   = ((dGainLeft / dSetpointLeft) / dOutsideTurnDivisor);
+			dSpeedRight  = (((dGainLeft / dSetpointLeft) / dInsideTurnDivisor) * -1);
+
+			// Minimum turning speed of speed forward.
+			if (dSpeedLeft < dSpeedForward)
 			{
-				dSpeedLeft   = ((dGainLeft / dSetpointLeft) / dOutsideTurnDivisor) + dSpeedTurning;
-				dSpeedRight  = (((dGainLeft / dSetpointLeft) / dInsideTurnDivisor) + dSpeedTurning) * -1;
-			}
-			else
-			{
-				dSpeedLeft   = ((dGainLeft / dSetpointLeft) / dOutsideTurnDivisor);
-				dSpeedRight  = (((dGainLeft / dSetpointLeft) / dInsideTurnDivisor) * -1);
+				dSpeedLeft += dSpeedForward;
+				dSpeedRight += dSpeedForward * -1;
 			}
 		}
 		// Object is offset to the right, turn.
 		if (dxCenter > dSetpointRight)
 		{
-			if (!((dxCenter - dSetpointRight) >= dTurningTolerance))
+			dSpeedLeft  = ((dGainRight / dSetpointRight) / dInsideTurnDivisor);
+			dSpeedRight = (((dGainRight / dSetpointRight) / dOutsideTurnDivisor) * -1);
+
+			// Minimum turning speed of speed forward.
+			if (dSpeedRight < dSpeedForward)
 			{
-				dSpeedLeft  = ((dGainRight / dSetpointRight) / dInsideTurnDivisor) + dSpeedTurning;
-				dSpeedRight = (((dGainRight / dSetpointRight) / dOutsideTurnDivisor) + dSpeedTurning) * -1;
-			}
-			else
-			{
-				dSpeedLeft  = ((dGainRight / dSetpointRight) / dInsideTurnDivisor);
-				dSpeedRight = (((dGainRight / dSetpointRight) / dOutsideTurnDivisor) * -1);
+				dSpeedLeft += dSpeedForward;
+				dSpeedRight += dSpeedForward * -1;
 			}
 		}
 	}
