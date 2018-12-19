@@ -1,7 +1,6 @@
 import argparse
 import cv2
 import time
-from CountsPerSec import CountsPerSec
 from VideoProcess import VideoProcess
 from VideoGet import VideoGet
 from VisionNetworking import VisionNetworking
@@ -40,9 +39,8 @@ def threadBoth(gui, server, source=0):
 
     # Create Object Pointers
     video_getter = VideoGet(source).start()
-    video_processor = VideoProcess(gui, video_getter.frame).start()
-    vision_networking = VisionNetworking(server, video_processor.pointArray).start()
-    cps = CountsPerSec().start()
+    video_processor = VideoProcess(gui, video_getter.frame, video_getter.resolution).start()
+    vision_networking = VisionNetworking(gui, server, video_processor.pointArray, video_getter.resolution).start()
 
     # Main multithreading loop.
     while True:
@@ -55,6 +53,9 @@ def threadBoth(gui, server, source=0):
         # Pass camera frame between classes.
         frame = video_getter.frame                        # Grab frame from camera.
         video_processor.frame = frame                     # Push camera frame to VideoProcess class for vision processing.
+        resolution = video_getter.resolution              # Grab camera resolution.
+        vision_networking.resolution = resolution         # Push camera resolution to VideoNetworking class and VideoProcess class.
+        video_processor.resolution = resolution
 
         # Pass required info between classes.
         trackbarValues = vision_networking.trackbarValues # Pass trackbar values from VisionNetworking to VisionProcess.
@@ -63,15 +64,10 @@ def threadBoth(gui, server, source=0):
         vision_networking.pointArray = pointArray
         mode = vision_networking.mode                     # Pass vision mode from VisionNetworking to VideoProcess
         video_processor.mode = mode
-        
-
-        # Increment counts per second.
-        cps.increment()
-        # Print cps in terminal if gui is turned off.
-        if gui == "no":
-            print cps.countsPerSec()
-
-        # Sleep so other threads can catch up.
+        speed = video_processor.speed                     # Pass vision speed from VideProcess to VisionNetworking
+        vision_networking.speed = speed
+            
+        # Add delay so other threads can catch up.
         time.sleep(0.02)
 
 def main():

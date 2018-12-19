@@ -10,11 +10,14 @@ class VisionNetworking:
     Class that continuously sends data to and from the VideoProcess class
     between the RoboRIO with a dedicated thread.
     '''
-    def __init__(self, server, pointArray):
+    def __init__(self, gui, server, pointArray, resolution=None):
         # Create global variables.
+        self.gui = gui
         self.mode = "free"
+        self.speed = 0
         self.server = server
         self.pointArray = pointArray
+        self.resolution = resolution
         self.trackbarValues = [[0,0], [0,0], [0,0]]
         self.stopped = False
 
@@ -27,18 +30,33 @@ class VisionNetworking:
         self.NWTB.putBoolean("VisionFreeMode", True)
         self.NWTB.putNumber("VisionObjectSize", 0)
         self.NWTB.putNumber("VisionObjectCenter", 0)
+        self.NWTB.putNumber("VisionHorizontalRes", self.resolution[0])
         self.freeModeEnabled = self.NWTB.getEntry("VisionFreeMode")
+        
+        # Open values from files and set trackbar position.
+        self.hmnReadFree = open('/home/pi/Desktop/Values/FreeMode/hmn.txt', 'r')
+        self.hmxReadFree = open('/home/pi/Desktop/Values/FreeMode/hmx.txt', 'r')
+        self.smnReadFree = open('/home/pi/Desktop/Values/FreeMode/smn.txt', 'r')
+        self.smxReadFree = open('/home/pi/Desktop/Values/FreeMode/smx.txt', 'r')
+        self.vmnReadFree = open('/home/pi/Desktop/Values/FreeMode/vmn.txt', 'r')
+        self.vmxReadFree = open('/home/pi/Desktop/Values/FreeMode/vmx.txt', 'r')
+        (self.trackbarValues[0][0]) = self.hmnReadFree.read()
+        (self.trackbarValues[0][1]) = self.hmxReadFree.read()
+        (self.trackbarValues[1][0]) = self.smnReadFree.read()
+        (self.trackbarValues[1][1]) = self.smxReadFree.read()
+        (self.trackbarValues[2][0]) = self.vmnReadFree.read()
+        (self.trackbarValues[2][1]) = self.vmxReadFree.read()
 
     def start(self):
         Thread(target=self.network, args=()).start()
         return self
 
     def network(self):
-        # Create variables.
+        # Create variables and object pointers.
         rotationSwitcher = 0
-        trackbarSwitcher = 0
         modeSwitcher = 0
-
+        oldTime = 0
+        
         while not self.stopped:
             # Get NetworkTable data.
             if self.freeModeEnabled.value == True and modeSwitcher == 0:
@@ -64,6 +82,9 @@ class VisionNetworking:
                 # Output values to NetworkTables for robot movement.
                 self.NWTB.putNumber("VisionObjectSize", xSize)
                 self.NWTB.putNumber("VisionObjectCenter", xCenter)
+                # Print debug info if the gui is disabled.
+                if self.gui == "no":
+                    print "Object Rotation: normal"
 
             if rotationSwitcher == 1:
                 # Calculate the width of the object with reversed calculations.
@@ -73,40 +94,77 @@ class VisionNetworking:
                 # Output values to NetworkTables for robot movement.
                 self.NWTB.putNumber("VisionObjectSize", xSize)
                 self.NWTB.putNumber("VisionObjectCenter", xCenter)
+                # Print debug info if the gui is disabled.
+                if self.gui == "no":
+                    print "Object Rotation: rotated"
 
-            # Open stored trackbar values.
-            if self.mode == "free" and trackbarSwitcher == 0:
-                hmnReadFree = open('/home/vision/Desktop/Values/FreeMode/hmn.txt', 'r')
-                (self.trackbarValues[0][0]) = hmnReadFree.read()
-                hmxReadFree = open('/home/vision/Desktop/Values/FreeMode/hmx.txt', 'r')
-                (self.trackbarValues[0][1]) = hmxReadFree.read()
-                smnReadFree = open('/home/vision/Desktop/Values/FreeMode/smn.txt', 'r')
-                (self.trackbarValues[1][0]) = smnReadFree.read()
-                smxReadFree = open('/home/vision/Desktop/Values/FreeMode/smx.txt', 'r')
-                (self.trackbarValues[1][1]) = smxReadFree.read()
-                vmnReadFree = open('/home/vision/Desktop/Values/FreeMode/vmn.txt', 'r')
-                (self.trackbarValues[2][0]) = vmnReadFree.read()
-                vmxReadFree = open('/home/vision/Desktop/Values/FreeMode/vmx.txt', 'r')
-                (self.trackbarValues[2][1]) = vmxReadFree.read()
-                trackbarSwitcher = 1
+            # Check if the files or mode have changed and set trackbar values.
+            if self.mode == "free":
+                hmnReadFree = open('/home/pi/Desktop/Values/FreeMode/hmn.txt', 'r')
+                if (self.trackbarValues[0][0]) != hmnReadFree.read():
+                    (self.trackbarValues[0][0]) = hmnReadFree.read()
+                hmxReadFree = open('/home/pi/Desktop/Values/FreeMode/hmx.txt', 'r')
+                if (self.trackbarValues[0][1]) != hmxReadFree.read():
+                    (self.trackbarValues[0][1]) = hmxReadFree.read()
+                smnReadFree = open('/home/pi/Desktop/Values/FreeMode/smn.txt', 'r')
+                if (self.trackbarValues[1][0]) != smnReadFree.read():
+                    (self.trackbarValues[1][0]) = smnReadFree.read()
+                smxReadFree = open('/home/pi/Desktop/Values/FreeMode/smx.txt', 'r')
+                if (self.trackbarValues[1][1]) != smxReadFree.read():
+                    (self.trackbarValues[1][1]) = smxReadFree.read()
+                vmnReadFree = open('/home/pi/Desktop/Values/FreeMode/vmn.txt', 'r')
+                if (self.trackbarValues[2][0]) != vmnReadFree.read():
+                    (self.trackbarValues[2][0]) = vmnReadFree.read()
+                vmxReadFree = open('/home/pi/Desktop/Values/FreeMode/vmx.txt', 'r')
+                if (self.trackbarValues[2][1]) != vmxReadFree.read():
+                    (self.trackbarValues[2][1]) = vmxReadFree.read()
 
-            if self.mode == "tape" and trackbarSwitcher == 1:
-                hmnReadTape = open('/home/vision/Desktop/Values/TapeMode/hmn.txt', 'r')
-                (self.trackbarValues[0][0]) = hmnReadTape.read()
-                hmxReadTape = open('/home/vision/Desktop/Values/TapeMode/hmx.txt', 'r')
-                (self.trackbarValues[0][1]) = hmxReadTape.read()
-                smnReadTape = open('/home/vision/Desktop/Values/TapeMode/smn.txt', 'r')
-                (self.trackbarValues[1][0]) = smnReadTape.read()
-                smxReadTape = open('/home/vision/Desktop/Values/TapeMode/smx.txt', 'r')
-                (self.trackbarValues[1][1]) = smxReadTape.read()
-                vmnReadTape = open('/home/vision/Desktop/Values/TapeMode/vmn.txt', 'r')
-                (self.trackbarValues[2][0]) = vmnReadTape.read()
-                vmxReadTape = open('/home/vision/Desktop/Values/TapeMode/vmx.txt', 'r')
-                (self.trackbarValues[2][1]) = vmxReadTape.read()
-                trackbarSwitcher = 0
+            if self.mode == "tape":
+                hmnReadTape = open('/home/pi/Desktop/Values/TapeMode/hmn.txt', 'r')
+                if (self.trackbarValues[0][0]) != hmnReadTape.read():
+                    (self.trackbarValues[0][0]) = hmnReadTape.read()
+                hmxReadTape = open('/home/pi/Desktop/Values/TapeMode/hmx.txt', 'r')
+                if (self.trackbarValues[0][1]) != hmxReadTape.read():
+                    (self.trackbarValues[0][1]) = hmxReadTape.read()
+                smnReadTape = open('/home/pi/Desktop/Values/TapeMode/smn.txt', 'r')
+                if (self.trackbarValues[1][0]) != smnReadTape.read():
+                    (self.trackbarValues[1][0]) = smnReadTape.read()
+                smxReadTape = open('/home/pi/Desktop/Values/TapeMode/smx.txt', 'r')
+                if (self.trackbarValues[1][1]) != smxReadTape.read():
+                    (self.trackbarValues[1][1]) = smxReadTape.read()
+                vmnReadTape = open('/home/pi/Desktop/Values/TapeMode/vmn.txt', 'r')
+                if (self.trackbarValues[2][0]) != vmnReadTape.read():
+                    (self.trackbarValues[2][0]) = vmnReadTape.read()
+                vmxReadTape = open('/home/pi/Desktop/Values/TapeMode/vmx.txt', 'r')
+                if (self.trackbarValues[2][1]) != vmxReadTape.read():
+                    (self.trackbarValues[2][1]) = vmxReadTape.read()
+
+            # Send telemtry data to webserver.
+            seconds = int(time.time())
+            if seconds % 2 == 0 and seconds != oldTime:
+                telemetryMode = open('/home/pi/Desktop/Values/Telemetry/mode.txt', 'w')
+                telemetryMode.write(self.mode)
+                telemetrySpeed = open('/home/pi/Desktop/Values/Telemetry/speed.txt', 'w')
+                telemetrySpeed.write(str(self.speed))
+                telemetryPointArray = open('/home/pi/Desktop/Values/Telemetry/pointarray.txt', 'w')
+                telemetryPointArray.write(str(self.pointArray))
+                telemetryTrackbars = open('/home/pi/Desktop/Values/Telemetry/trackbarvalues.txt', 'w')
+                telemetryTrackbars.write(str(self.trackbarValues))
+                oldTime = seconds
+
+            # Print debug info if the gui is disabled.
+            if self.gui == "no":
+                print "Vision Camera Res: " + str(self.resolution[0]) + "x" + str(self.resolution[1])
+                print "Vision Mode: " + self.mode
+                print "Vision Size: " + str(xSize)
+                print "Vision Center: " + str(xCenter)
+                print "Vision Frequency: " + str(self.speed)
+                print "Vision Point Array: \n" + str(self.pointArray)
+                print "Vision Track-bar Values Array: " + str(self.trackbarValues)
 
             # Add delay so it doesn't flood the network.
-            time.sleep(0.02)
+            time.sleep(0.07) # 0.02s
 
     def stop(self):
         self.stopped = True
+##        BackgroundScheduler().shutdown()
