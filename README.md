@@ -32,6 +32,9 @@ Also note, if you want the vision program to autostart add the directory and com
   
   To visit the website type the hostname of your computer or its IP address. For example, if your useing a raspberry pi you
   could type `raspberrypi.local`.
+  
+  ![alt text](https://github.com/LASER3284/2018-Robot-Code/blob/vision/web_interface/Capture.PNG)
+  ###### Vision Tuning Dashboard
 
 ### Running Vision Tracking:
   To run the program make sure to `chmod a+x` the entire directory containing the vision files. This allows the program to access 
