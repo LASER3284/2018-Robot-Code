@@ -2,16 +2,22 @@ from threading import Thread
 import numpy as np
 import cv2
 import cv2 as cv
+from CountsPerSec import CountsPerSec
 
 class VideoProcess:
     '''
     Class that continuously shows a frame using a dedicated thread.
     '''
-    def __init__(self, gui, frame=None, trackbarValues=None):
+    def __init__(self, gui, frame=None, resolution=None, trackbarValues=None):
+        # Create object pointer for speed tracking.
+        self.cps = CountsPerSec().start()
+
         # Create global variables.
         self.gui = gui
         self.mode = "free"
         self.frame = frame
+        self.resolution = resolution
+        self.speed = self.cps.countsPerSec()
         self.trackbarValues = trackbarValues
         self.pointArray = [[0,0], [0,0], [0,0], [0,0]]
         self.stopped = False
@@ -99,7 +105,7 @@ class VideoProcess:
             clean = cv2.medianBlur(combined, 5)
             
             # Fuse the image and add slight blur to improve tracking.
-            dilation = cv2.dilate(clean,kernel,iterations = 1)
+            dilation = cv2.dilate(clean, kernel, iterations = 2)
             closing = cv2.morphologyEx(dilation, cv2.MORPH_CLOSE, kernel)
             closing = cv2.GaussianBlur(closing,(5,5),0)
 
@@ -112,12 +118,6 @@ class VideoProcess:
 
             # Set new threshold.
             _, bin = cv2.threshold(edged, 40, 255, 0)
-
-            # Fill holes and make correct image zoom.
-            bin = cv2.dilate(bin, None)
-            bin = cv2.dilate(bin, None)
-            bin = cv2.erode(bin, None)
-            bin = cv2.erode(bin, None)
 
             # Find contours of the second image.
             bin, contours, hierarchy = cv2.findContours(bin, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
@@ -143,6 +143,15 @@ class VideoProcess:
                         cv2.circle(frame,pt,5,(255,0,0),2)
                         font = cv2.FONT_HERSHEY_SIMPLEX
                         cv2.putText(frame,str(nameStepper),pt,font,1,(0,0,255),1,cv2.LINE_AA)
+            else:
+                self.pointArray[0][0] = (self.resolution[0] / 2) - 4
+                self.pointArray[0][1] = (self.resolution[1] / 2) - 4
+                self.pointArray[1][0] = (self.resolution[0] / 2) - 4
+                self.pointArray[1][1] = (self.resolution[1] / 2) + 4
+                self.pointArray[2][0] = (self.resolution[0] / 2) + 4
+                self.pointArray[2][1] = (self.resolution[1] / 2) - 4
+                self.pointArray[3][0] = (self.resolution[0] / 2) + 4
+                self.pointArray[3][1] = (self.resolution[1] / 2) + 4
 
             # Enable/Disable GUI.
             if self.gui == "yes":
@@ -150,13 +159,17 @@ class VideoProcess:
                 cv2.imshow("HueComp", hthresh)
                 cv2.imshow("SatComp", sthresh)
                 cv2.imshow("ValComp", vthresh)
-##                cv2.imshow("Combined", combined)
-##                cv2.imshow("Clean", clean)
-##                cv2.imshow("Dilation", dilation)
-##                cv2.imshow("Closing", closing)
-##                cv2.imshow("Closed", closed)
+                cv2.imshow("Combined", combined)
+                cv2.imshow("Clean", clean)
+                cv2.imshow("Dilation", dilation)
+                cv2.imshow("Closing", closing)
+                cv2.imshow("Closed", closed)
                 cv2.imshow("Edged", edged)
                 cv2.imshow("Tracking", frame)
+                
+            # Increment counts per second.
+            self.cps.increment()
+            self.speed = self.cps.countsPerSec()
 
             # Add small delay and if q is pressed quit.
             if cv2.waitKey(1) == ord("q"):

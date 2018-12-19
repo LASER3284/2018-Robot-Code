@@ -1,5 +1,5 @@
 from datetime import datetime
- 
+
 class CountsPerSec:
     """
     Class that tracks the number of occurrences ("counts") of an
