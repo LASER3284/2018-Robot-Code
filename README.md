@@ -13,7 +13,7 @@ Generally, you can compile it however you'd like using FRC Toolchains.
 <br>
 # Vision Processing
 Current working version of object tracking with the Raspberry Pi 3. Also includes new version equiped
-with multi-threading. Built with Python 2.7 using OpenCV 3.3 libraries and [pynetworktables](https://github.com/robotpy/pynetworktables) with [monotonic](https://pypi.org/project/monotonic/#files).
+with multi-threading and a web interface for adjusting values on the fly. Built with Python 2.7 using OpenCV 3.3 libraries and [pynetworktables](https://github.com/robotpy/pynetworktables) with [monotonic](https://pypi.org/project/monotonic/#files).
 ## Other Folders:
 ###  Values:
   This folder is meant to be placed on the desktop of the Raspberry Pi allowing the program
@@ -24,6 +24,14 @@ with multi-threading. Built with Python 2.7 using OpenCV 3.3 libraries and [pyne
   Make sure to add cpu_governor.sh to autostart in `/etc/rc.local` file (remove CPU throttling).
     
 Also note, if you want the vision program to autostart add the directory and command to start it to the rc.local in `/etc/`.
+
+###  How to Setup the Web Interface
+  First, a webserver such as Apache2 or NGINX needs to be installed on your linux machine. We use Apache2 as it is relatively simple
+  and fast to setup. To install Apache open a terminal and type: `sudo apt install apache2`. After the installation completes drop
+  the contents of `web_interface` into `/var/www/html` and reboot the linux machine. 
+  
+  To visit the website type the hostname of your computer or its IP address. For example, if your useing a raspberry pi you
+  could type `raspberrypi.local`.
 
 ### Running Vision Tracking:
   To run the program make sure to `chmod a+x` the entire directory containing the vision files. This allows the program to access 
@@ -42,4 +50,4 @@ optional arguments:
                             their own threads), none (default--no multithreading)
     --gui GUI, -g GUI     Graphical User Interface: yes (show video windows for 
                             vision tuning), no (default, run supa fast)
-```
+``
