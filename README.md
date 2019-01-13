@@ -49,7 +49,7 @@ optional arguments:
                             Path to video file or integer representing webcam
                             index (default 0).
     --thread THREAD, -t THREAD
-                            Threading mode: both (video read and video show in
+                            Threading mode: all (video read and video show in
                             their own threads), none (default--no multithreading)
     --gui GUI, -g GUI     Graphical User Interface: yes (show video windows for 
                             vision tuning), no (default, run supa fast)
