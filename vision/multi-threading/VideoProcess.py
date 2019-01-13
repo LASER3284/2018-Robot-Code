@@ -134,17 +134,26 @@ class VideoProcess:
 
                 if self.gui == "yes":
                     # Draw circles and numbers.
-                    nameStepper = int(0)
+                    nameStepper = 0
                     for p in box:
                         nameStepper = nameStepper + 1
-                        # Show four points of the rectangle.
-                        x = int(p[0])
-                        y = int(p[1])
-                        # Draw blue circles and numbers for refrence.
-                        pt = int(p[0]),int(p[1])
-                        cv2.circle(frame,pt,5,(255,0,0),2)
+                        # Draw blue circles and numbers.
+                        pt = int(p[0]), int(p[1])
+                        cv2.circle(frame, pt, 5, (255, 0, 0), 2)
                         font = cv2.FONT_HERSHEY_SIMPLEX
-                        cv2.putText(frame,str(nameStepper),pt,font,1,(0,0,255),1,cv2.LINE_AA)
+                        cv2.putText(frame, str(nameStepper), pt, font, 1, (0, 0, 255), 1, cv2.LINE_AA)
+
+                if self.gui == "no":
+                    # Draw enclosing circle.
+                    cv2.drawContours(frame, contours, -1, ( 255, 255, 210), 1)
+                    (x, y), radius = cv2.minEnclosingCircle(c)
+                    cv2.circle(frame, (int(x), int(y)), int(radius), (0, 255, 0), 1)
+                    nameStepper = 0
+                    for p in box:
+                        # Draw blue circles.
+                        pt = int(p[0]), int(p[1])
+                        cv2.circle(frame, pt, 5, (255, 0, 0), 1)
+
             else:
                 self.pointArray[0][0] = (self.resolution[0] / 2) - 4
                 self.pointArray[0][1] = (self.resolution[1] / 2) - 4
