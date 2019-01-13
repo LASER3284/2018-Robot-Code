@@ -1,3 +1,4 @@
+#from multiprocessing import Process
 from threading import Thread
 import logging
 import numpy
@@ -34,12 +35,12 @@ class VisionNetworking:
         self.freeModeEnabled = self.NWTB.getEntry("VisionFreeMode")
         
         # Open values from files and set trackbar position.
-        self.hmnReadFree = open('/home/pi/Desktop/Values/FreeMode/hmn.txt', 'r')
-        self.hmxReadFree = open('/home/pi/Desktop/Values/FreeMode/hmx.txt', 'r')
-        self.smnReadFree = open('/home/pi/Desktop/Values/FreeMode/smn.txt', 'r')
-        self.smxReadFree = open('/home/pi/Desktop/Values/FreeMode/smx.txt', 'r')
-        self.vmnReadFree = open('/home/pi/Desktop/Values/FreeMode/vmn.txt', 'r')
-        self.vmxReadFree = open('/home/pi/Desktop/Values/FreeMode/vmx.txt', 'r')
+        self.hmnReadFree = open("/home/pi/Desktop/Values/FreeMode/hmn.txt", "r")
+        self.hmxReadFree = open("/home/pi/Desktop/Values/FreeMode/hmx.txt", "r")
+        self.smnReadFree = open("/home/pi/Desktop/Values/FreeMode/smn.txt", "r")
+        self.smxReadFree = open("/home/pi/Desktop/Values/FreeMode/smx.txt", "r")
+        self.vmnReadFree = open("/home/pi/Desktop/Values/FreeMode/vmn.txt", "r")
+        self.vmxReadFree = open("/home/pi/Desktop/Values/FreeMode/vmx.txt", "r")
         (self.trackbarValues[0][0]) = self.hmnReadFree.read()
         (self.trackbarValues[0][1]) = self.hmxReadFree.read()
         (self.trackbarValues[1][0]) = self.smnReadFree.read()
@@ -100,55 +101,55 @@ class VisionNetworking:
 
             # Check if the files or mode have changed and set trackbar values.
             if self.mode == "free":
-                hmnReadFree = open('/home/pi/Desktop/Values/FreeMode/hmn.txt', 'r')
+                hmnReadFree = open("/home/pi/Desktop/Values/FreeMode/hmn.txt", "r")
                 if (self.trackbarValues[0][0]) != hmnReadFree.read():
                     (self.trackbarValues[0][0]) = hmnReadFree.read()
-                hmxReadFree = open('/home/pi/Desktop/Values/FreeMode/hmx.txt', 'r')
+                hmxReadFree = open("/home/pi/Desktop/Values/FreeMode/hmx.txt", "r")
                 if (self.trackbarValues[0][1]) != hmxReadFree.read():
                     (self.trackbarValues[0][1]) = hmxReadFree.read()
-                smnReadFree = open('/home/pi/Desktop/Values/FreeMode/smn.txt', 'r')
+                smnReadFree = open("/home/pi/Desktop/Values/FreeMode/smn.txt", "r")
                 if (self.trackbarValues[1][0]) != smnReadFree.read():
                     (self.trackbarValues[1][0]) = smnReadFree.read()
-                smxReadFree = open('/home/pi/Desktop/Values/FreeMode/smx.txt', 'r')
+                smxReadFree = open("/home/pi/Desktop/Values/FreeMode/smx.txt", "r")
                 if (self.trackbarValues[1][1]) != smxReadFree.read():
                     (self.trackbarValues[1][1]) = smxReadFree.read()
-                vmnReadFree = open('/home/pi/Desktop/Values/FreeMode/vmn.txt', 'r')
+                vmnReadFree = open("/home/pi/Desktop/Values/FreeMode/vmn.txt", "r")
                 if (self.trackbarValues[2][0]) != vmnReadFree.read():
                     (self.trackbarValues[2][0]) = vmnReadFree.read()
-                vmxReadFree = open('/home/pi/Desktop/Values/FreeMode/vmx.txt', 'r')
+                vmxReadFree = open("/home/pi/Desktop/Values/FreeMode/vmx.txt", "r")
                 if (self.trackbarValues[2][1]) != vmxReadFree.read():
                     (self.trackbarValues[2][1]) = vmxReadFree.read()
 
             if self.mode == "tape":
-                hmnReadTape = open('/home/pi/Desktop/Values/TapeMode/hmn.txt', 'r')
+                hmnReadTape = open("/home/pi/Desktop/Values/TapeMode/hmn.txt", "r")
                 if (self.trackbarValues[0][0]) != hmnReadTape.read():
                     (self.trackbarValues[0][0]) = hmnReadTape.read()
-                hmxReadTape = open('/home/pi/Desktop/Values/TapeMode/hmx.txt', 'r')
+                hmxReadTape = open("/home/pi/Desktop/Values/TapeMode/hmx.txt", "r")
                 if (self.trackbarValues[0][1]) != hmxReadTape.read():
                     (self.trackbarValues[0][1]) = hmxReadTape.read()
-                smnReadTape = open('/home/pi/Desktop/Values/TapeMode/smn.txt', 'r')
+                smnReadTape = open("/home/pi/Desktop/Values/TapeMode/smn.txt", "r")
                 if (self.trackbarValues[1][0]) != smnReadTape.read():
                     (self.trackbarValues[1][0]) = smnReadTape.read()
-                smxReadTape = open('/home/pi/Desktop/Values/TapeMode/smx.txt', 'r')
+                smxReadTape = open("/home/pi/Desktop/Values/TapeMode/smx.txt", "r")
                 if (self.trackbarValues[1][1]) != smxReadTape.read():
                     (self.trackbarValues[1][1]) = smxReadTape.read()
-                vmnReadTape = open('/home/pi/Desktop/Values/TapeMode/vmn.txt', 'r')
+                vmnReadTape = open("/home/pi/Desktop/Values/TapeMode/vmn.txt", "r")
                 if (self.trackbarValues[2][0]) != vmnReadTape.read():
                     (self.trackbarValues[2][0]) = vmnReadTape.read()
-                vmxReadTape = open('/home/pi/Desktop/Values/TapeMode/vmx.txt', 'r')
+                vmxReadTape = open("/home/pi/Desktop/Values/TapeMode/vmx.txt", "r")
                 if (self.trackbarValues[2][1]) != vmxReadTape.read():
                     (self.trackbarValues[2][1]) = vmxReadTape.read()
 
             # Send telemtry data to webserver.
             seconds = int(time.time())
             if seconds % 2 == 0 and seconds != oldTime:
-                telemetryMode = open('/home/pi/Desktop/Values/Telemetry/mode.txt', 'w')
+                telemetryMode = open("/home/pi/Desktop/Values/Telemetry/mode.txt", "w")
                 telemetryMode.write(self.mode)
-                telemetrySpeed = open('/home/pi/Desktop/Values/Telemetry/speed.txt', 'w')
+                telemetrySpeed = open("/home/pi/Desktop/Values/Telemetry/speed.txt", "w")
                 telemetrySpeed.write(str(self.speed))
-                telemetryPointArray = open('/home/pi/Desktop/Values/Telemetry/pointarray.txt', 'w')
+                telemetryPointArray = open("/home/pi/Desktop/Values/Telemetry/pointarray.txt", "w")
                 telemetryPointArray.write(str(self.pointArray))
-                telemetryTrackbars = open('/home/pi/Desktop/Values/Telemetry/trackbarvalues.txt', 'w')
+                telemetryTrackbars = open("/home/pi/Desktop/Values/Telemetry/trackbarvalues.txt", "w")
                 telemetryTrackbars.write(str(self.trackbarValues))
                 oldTime = seconds
 
@@ -167,4 +168,3 @@ class VisionNetworking:
 
     def stop(self):
         self.stopped = True
-##        BackgroundScheduler().shutdown()
