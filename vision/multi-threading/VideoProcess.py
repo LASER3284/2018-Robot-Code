@@ -1,4 +1,5 @@
 from threading import Thread
+#from multiprocessing import Process
 import numpy as np
 import cv2
 import cv2 as cv
@@ -16,6 +17,7 @@ class VideoProcess:
         self.gui = gui
         self.mode = "free"
         self.frame = frame
+        self.processedFrame = frame
         self.resolution = resolution
         self.speed = self.cps.countsPerSec()
         self.trackbarValues = trackbarValues
@@ -23,10 +25,10 @@ class VideoProcess:
         self.stopped = False
 
     def start(self):
-        Thread(target=self.trackObject, args=()).start()
+        Thread(target=self.detectObject, args=()).start()
         return self
 
-    def trackObject(self):
+    def detectObject(self):
         # Create variables.
         setPosition = True
         sameAsBefore = 0
@@ -166,7 +168,10 @@ class VideoProcess:
                 cv2.imshow("Closed", closed)
                 cv2.imshow("Edged", edged)
                 cv2.imshow("Tracking", frame)
-                
+
+            # Send the final frame for streaming.
+            self.processedFrame = frame
+
             # Increment counts per second.
             self.cps.increment()
             self.speed = self.cps.countsPerSec()
