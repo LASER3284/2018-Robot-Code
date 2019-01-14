@@ -43,7 +43,7 @@ def multiThreading(gui, server, source=0):
     video_getter = VideoGet(source).start()
     video_processor = VideoProcess(gui, video_getter.frame, video_getter.resolution, [[0,0], [0,0], [0,0]]).start()
     video_streamer = VideoStream(video_getter.stopped, video_processor.processedFrame).start()
-    vision_networking = VisionNetworking(gui, server, video_processor.pointArray, video_getter.resolution).start()
+    vision_networking = VisionNetworking(gui, server, video_processor.pointArray, video_processor.objectDetected, video_processor.rotation, video_getter.resolution).start()
     
     # Main multithreading loop.
     while True:
@@ -60,6 +60,10 @@ def multiThreading(gui, server, source=0):
         video_processor.frame = frame                     # Push camera frame to VideoProcess class for vision processing.
         stream = video_processor.processedFrame           # Grab the processed frame.
         video_streamer.processedFrame = stream            # Push processed frame to VideoStream class.
+        objectDetected = video_processor.objectDetected   # Grab boolean value for objectDetected.
+        vision_networking.objectDetected = objectDetected # Push objectDetected boolean to VisionNetworking.
+        rotation = video_processor.rotation               # Grab object rotation.
+        vision_networking.rotation = rotation             # Push rotation ro VisionNetworking.
         resolution = video_getter.resolution              # Grab camera resolution.
         vision_networking.resolution = resolution         # Push camera resolution to VideoNetworking class.
         video_processor.resolution = resolution           # Push camera resolution to VideoProcess class.

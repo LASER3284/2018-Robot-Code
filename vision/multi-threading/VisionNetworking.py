@@ -2,6 +2,7 @@
 from threading import Thread
 import logging
 import numpy
+import math
 import time
 import cv2
 from networktables import NetworkTables
@@ -11,13 +12,15 @@ class VisionNetworking:
     Class that continuously sends data to and from the VideoProcess class
     between the RoboRIO with a dedicated thread.
     '''
-    def __init__(self, gui, server, pointArray, resolution=None):
+    def __init__(self, gui, server, pointArray, objectDetected, rotation, resolution):
         # Create global variables.
         self.gui = gui
         self.mode = "free"
         self.speed = 0
         self.server = server
+        self.rotation = rotation
         self.pointArray = pointArray
+        self.objectDetected = objectDetected
         self.resolution = resolution
         self.trackbarValues = [[0,0], [0,0], [0,0]]
         self.stopped = False
@@ -159,6 +162,8 @@ class VisionNetworking:
                 print "Vision Mode: " + self.mode
                 print "Vision Size: " + str(xSize)
                 print "Vision Center: " + str(xCenter)
+                print "Vision Rotation: " + str(self.rotation)
+                print "Object Detected: " + str(self.objectDetected)
                 print "Vision Frequency: " + str(self.speed)
                 print "Vision Point Array: \n" + str(self.pointArray)
                 print "Vision Track-bar Values Array: " + str(self.trackbarValues)

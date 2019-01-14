@@ -17,7 +17,9 @@ class VideoProcess:
         self.gui = gui
         self.mode = "free"
         self.frame = frame
+        self.rotation = 0
         self.processedFrame = frame
+        self.objectDetected = False
         self.resolution = resolution
         self.speed = self.cps.countsPerSec()
         self.trackbarValues = trackbarValues
@@ -126,11 +128,17 @@ class VideoProcess:
 
             # Read contours and draw the four points of rectangle.
             if len(contours) != 0:
+                # Output that program has detected object.
+                self.objectDetected = True
+
                 # Find the biggest area.
                 c = max(contours, key = cv2.contourArea)
                 rect = cv2.minAreaRect(c)
                 box = cv2.boxPoints(rect)
                 self.pointArray = box
+                
+                # Get the angle of the rectangle.
+                self.rotation = rect[2]
 
                 if self.gui == "yes":
                     # Draw circles and numbers.
@@ -155,6 +163,7 @@ class VideoProcess:
                         cv2.circle(frame, pt, 5, (255, 0, 0), 1)
 
             else:
+                # Default values if nothing is detected.
                 self.pointArray[0][0] = (self.resolution[0] / 2) - 4
                 self.pointArray[0][1] = (self.resolution[1] / 2) - 4
                 self.pointArray[1][0] = (self.resolution[0] / 2) - 4
@@ -163,6 +172,8 @@ class VideoProcess:
                 self.pointArray[2][1] = (self.resolution[1] / 2) - 4
                 self.pointArray[3][0] = (self.resolution[0] / 2) + 4
                 self.pointArray[3][1] = (self.resolution[1] / 2) + 4
+                # Output that the program does not detect an object.
+                self.objectDetected = False
 
             # Enable/Disable GUI.
             if self.gui == "yes":
